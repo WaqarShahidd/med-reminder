@@ -1,20 +1,28 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StatusBar } from "expo-status-bar";
+import { StyleSheet, Text, View } from "react-native";
+import Scanner from "./src/Screens/Home/Scanner";
+import { TamaguiProvider, createTamagui } from "tamagui";
+import { config } from "@tamagui/config/v3";
+import WelcomeScreen from "./src/Screens/Login/WelcomeScreen";
+import Navigation from "./src/navigation/Navigation";
+import { NavigationContainer } from "@react-navigation/native";
+
+const tamaguiConfig = createTamagui(config);
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    // <NavigationContainer>
+    //   <Navigation />
+    // </NavigationContainer>
+    <Scanner />
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

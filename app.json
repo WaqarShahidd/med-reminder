@@ -11,7 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.waqarshahidd.medicinereminder"
@@ -30,6 +32,12 @@
       "eas": {
         "projectId": "ed3993e0-14ab-43af-965f-0f07601ec5dc"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/ed3993e0-14ab-43af-965f-0f07601ec5dc"
     }
   }
 }

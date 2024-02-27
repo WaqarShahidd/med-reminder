@@ -4,6 +4,7 @@ import { colors } from "../../theme/theme";
 import { CustomInput, CustomPasswordInput } from "../../components/CustomInput";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import CustomBtn from "../../components/CustomBtn";
+import { useNavigation } from "@react-navigation/native";
 
 const { fontScale } = Dimensions.get("window");
 
@@ -11,6 +12,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const navigation = useNavigation();
   return (
     <View style={styles.container}>
       <View style={styles.subContainer}>
@@ -50,7 +52,12 @@ const Login = () => {
           marginHorizontal: 20,
         }}
       >
-        <CustomBtn text="Login" primary margin />
+        <CustomBtn
+          text="Login"
+          primary
+          margin
+          onPress={() => navigation.navigate("Tabs")}
+        />
       </View>
     </View>
   );

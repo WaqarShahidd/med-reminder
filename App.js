@@ -6,15 +6,15 @@ import { config } from "@tamagui/config/v3";
 import WelcomeScreen from "./src/Screens/Login/WelcomeScreen";
 import Navigation from "./src/navigation/Navigation";
 import { NavigationContainer } from "@react-navigation/native";
+import Schedule from "./src/Screens/Schedule/Schedule";
 
 const tamaguiConfig = createTamagui(config);
 
 export default function App() {
   return (
-    // <NavigationContainer>
-    //   <Navigation />
-    // </NavigationContainer>
-    <Scanner />
+    <NavigationContainer>
+      <Navigation />
+    </NavigationContainer>
   );
 }
 

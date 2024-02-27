@@ -16,8 +16,10 @@ import * as ImagePicker from "expo-image-picker";
 import MlkitOcr, { MlkitOcrResult } from "react-native-mlkit-ocr";
 import CustomBtn from "../../components/CustomBtn";
 import { CustomInput } from "../../components/CustomInput";
+import { useNavigation } from "@react-navigation/native";
 
 const Scanner = () => {
+  const navigation = useNavigation();
   const [capturedImage, setCapturedImage] = useState(null);
   const [result, setResult] = useState();
 
@@ -240,7 +242,12 @@ const Scanner = () => {
                 }
               })}
               <View style={{ justifyContent: "flex-end" }}>
-                <CustomBtn text="Save" primary margin />
+                <CustomBtn
+                  text="Save"
+                  primary
+                  margin
+                  onPress={() => navigation.navigate("Schedule")}
+                />
                 <CustomBtn
                   text="Try again"
                   onPress={() => {

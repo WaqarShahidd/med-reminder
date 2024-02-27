@@ -6,16 +6,24 @@ import WelcomeScreen from "../Screens/Login/WelcomeScreen";
 import Login from "../Screens/Login/Login";
 import SignUp from "../Screens/Login/SignUp";
 import Scanner from "../Screens/Home/Scanner";
+import BottomTabs from "./BottomTabs";
 
 const Stack = createNativeStackNavigator();
 
 const Navigation = () => {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      initialRouteName={"Tabs"}
+      screenOptions={{
+        headerShown: false,
+        gestureEnabled: true,
+        gestureDirection: "horizontal",
+      }}
+    >
       <Stack.Screen name="WelcomeScreen" component={WelcomeScreen} />
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="SignUp" component={SignUp} />
-      <Stack.Screen name="Scanner" component={Scanner} />
+      <Stack.Screen name="Tabs" component={BottomTabs} />
     </Stack.Navigator>
   );
 };

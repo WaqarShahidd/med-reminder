@@ -10,17 +10,32 @@ import React from "react";
 import { useUser } from "../../constants/context";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { BASE_URL } from "../../constants/config";
 
 const { fontScale } = Dimensions.get("window");
 
 const Profile = () => {
-  const { isAuthenticated, setisAuthenticated } = useUser();
-  const logout = () => {
-    setisAuthenticated(false);
-    AsyncStorage.removeItem("userId");
-  };
+  const { isAuthenticated, setisAuthenticated, userData } = useUser();
 
   const navigation = useNavigation();
+
+  const LogOut = async () => {
+    console.log("Logging out");
+    setisAuthenticated(false);
+    AsyncStorage.removeItem("userId");
+    await axios
+      .post(`${BASE_URL}/api/user/LogOutUser`, {
+        userId: userData?.id,
+      })
+      .then((res) => {
+        console.log(res.data, "Logged out");
+      })
+      .catch((error) => {
+        console.log(error.response.data.message, "Log out failed");
+      });
+  };
+
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
       <View
@@ -39,11 +54,11 @@ const Profile = () => {
         <Text
           style={{
             fontSize: 22 / fontScale,
-            fontWeight: "600",
-            marginBottom: 20,
+            fontWeight: "700",
+            marginBottom: 25,
           }}
         >
-          Edit Profile
+          Settings
         </Text>
 
         <TouchableOpacity
@@ -52,7 +67,7 @@ const Profile = () => {
         >
           <Text style={{ fontSize: 16 / fontScale }}>Edit Profile</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.btn} onPress={logout}>
+        <TouchableOpacity style={styles.btn} onPress={LogOut}>
           <Text style={{ fontSize: 16 / fontScale }}>Logout</Text>
         </TouchableOpacity>
       </View>

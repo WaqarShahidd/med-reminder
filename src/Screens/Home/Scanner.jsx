@@ -86,8 +86,8 @@ const Scanner = () => {
         start_date: currentDate,
         end_date: currentDate,
         isMorning: when?.toLowerCase().includes("morning") ? true : false,
-        isEvening: when?.toLowerCase().includes("evening") ? true : false,
         isAfternoon: when?.toLowerCase().includes("afternoon") ? true : false,
+        isNight: when?.toLowerCase().includes("evening") ? true : false,
       })
       .then((res) => {
         setloading(false);
@@ -234,7 +234,7 @@ const Scanner = () => {
           </View>
 
           <View style={{ justifyContent: "flex-end" }}>
-            <CustomBtn text="Save" primary margin onPress={() => AddDrug()} />
+            <CustomBtn text="Save" primary margin onPress={AddDrug} />
             <CustomBtn
               text="Try again"
               onPress={() => {

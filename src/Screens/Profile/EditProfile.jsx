@@ -1,4 +1,5 @@
 import {
+  Alert,
   Dimensions,
   KeyboardAvoidingView,
   Platform,
@@ -47,10 +48,21 @@ const EditProfile = () => {
         userId: userData?.id,
       })
       .then((res) => {
-        console.log(res.data, "Token added");
+        console.log(res.data, "User update");
+
+        Alert.alert(
+          "Profile Updated",
+          "Your profile has been updated successfully",
+          [
+            {
+              text: "OK",
+              onPress: () => navigation.goBack(),
+            },
+          ]
+        );
       })
       .catch((error) => {
-        console.log(error.response.data.message, "Token not added");
+        console.log(error.response.data.message, "User not updated");
       });
   };
 
@@ -113,7 +125,7 @@ const EditProfile = () => {
             margin={true}
           />
         </View>
-        <View style={{ margin: 20 }}>
+        <View style={{ margin: 20, flex: 1, justifyContent: "flex-end" }}>
           <CustomBtn text="update" primary={true} onPress={UpdateUser} />
         </View>
       </ScrollView>
@@ -132,7 +144,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginHorizontal: 20,
-    marginTop: "10%",
+    marginTop: Platform.OS === "android" ? "10%" : "20%",
   },
   inputContainer: { marginTop: 10, marginHorizontal: 20, marginTop: "10%" },
   titleText: {

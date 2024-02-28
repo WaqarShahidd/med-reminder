@@ -34,9 +34,10 @@ const RenderList = ({ item, ChangeStatus }) => {
   const [animation] = useState(new Animated.Value(0));
 
   const toggleButton = () => {
+    const newValue = showButton ? 0 : 1;
     setShowButton(!showButton);
     Animated.timing(animation, {
-      toValue: showButton ? 0 : 1,
+      toValue: newValue,
       duration: 300,
       useNativeDriver: true,
     }).start();
@@ -46,13 +47,19 @@ const RenderList = ({ item, ChangeStatus }) => {
     <View style={styles.itemContainer}>
       <View style={styles.itemContent}>
         <View style={{}}>
-          <Text>
+          <Text onPress={() => console.log(item?.client_drug_info)}>
             <Text style={{ fontWeight: "700" }}>Drug: </Text>{" "}
             {item?.client_drug_info?.drugName}
           </Text>
           <Text style={{ marginVertical: 10 }}>
             <Text style={{ fontWeight: "700" }}>When to take: </Text>{" "}
-            {item?.client_drug_info?.whenToTake}
+            {item?.isMorning
+              ? "Morning "
+              : item?.isAfternoon
+              ? "Afternoon "
+              : item?.isNight
+              ? "Night "
+              : "No time selected"}
           </Text>
           <Text>
             <Text style={{ fontWeight: "700" }}>Quantity: </Text>{" "}
@@ -232,7 +239,7 @@ const Schedule = () => {
 
       <View
         style={{
-          marginVertical: 25,
+          marginTop: 25,
           justifyContent: "center",
           alignItems: "center",
         }}

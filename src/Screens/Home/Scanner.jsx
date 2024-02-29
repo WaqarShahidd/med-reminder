@@ -57,8 +57,8 @@ const Scanner = () => {
   const medicineRegex = /Medicine:\s*([^:\n].+)/i;
   const whenToTakeRegex = /When to take:\s*([^\n]+)/i;
   const quantityRegex = /Quantity:\s*([^\n]+)/i;
-  const fromDateRegex = /From:\s*(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})/i;
-  const toDateRegex = /To:\s*(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})/i;
+  const fromDateRegex = /From: (\d{2}\/\d{2}\/\d{4})/;
+  const toDateRegex = /To: (\d{2}\/\d{2}\/\d{4})/;
 
   const [drugName, setdrugName] = useState("");
   const [drugQuantity, setdrugQuantity] = useState("");
@@ -74,7 +74,7 @@ const Scanner = () => {
   const [loading, setloading] = useState("");
 
   const AddDrug = async () => {
-    console.log(drugName, drugQuantity, when, from, to);
+    console.log(medicineData);
     setloading(true);
     await axios
       .post(`${BASE_URL}/api/client/createDrugInfo`, {
@@ -100,9 +100,39 @@ const Scanner = () => {
       });
   };
 
+  // const updateStateFromResult = () => {
+  //   result.forEach((block) => {
+  //     const text = block.lines.map((line) => line.text.trim()).join("\n");
+
+  //     const medicineMatch = text.match(medicineRegex);
+  //     const whenToTakeMatch = text.match(whenToTakeRegex);
+  //     const quantityMatch = text.match(quantityRegex);
+  //     const fromDateMatch = text.match(fromDateRegex);
+  //     const toDateMatch = text.match(toDateRegex);
+
+  //     const medicine = medicineMatch ? medicineMatch[1] : null;
+  //     const whenToTake = whenToTakeMatch ? whenToTakeMatch[1] : null;
+  //     const quantity = quantityMatch ? parseInt(quantityMatch[1]) : null;
+  //     const fromDate = fromDateMatch ? fromDateMatch[1] : null;
+  //     const toDate = toDateMatch ? toDateMatch[1] : null;
+
+  //     if (medicine !== null) setdrugName(medicine);
+  //     if (whenToTake !== null) setwhen(whenToTake);
+  //     if (quantity !== null) setdrugQuantity(quantity.toString());
+  //     if (fromDate !== null) setFrom(fromDate);
+  //     if (toDate !== null) setTo(toDate);
+  //   });
+  // };
+
+  const [medicineData, setMedicineData] = useState([]);
+
   const updateStateFromResult = () => {
+    const extractedData = [];
+
     result.forEach((block) => {
       const text = block.lines.map((line) => line.text.trim()).join("\n");
+
+      console.log(text);
 
       const medicineMatch = text.match(medicineRegex);
       const whenToTakeMatch = text.match(whenToTakeRegex);
@@ -116,17 +146,86 @@ const Scanner = () => {
       const fromDate = fromDateMatch ? fromDateMatch[1] : null;
       const toDate = toDateMatch ? toDateMatch[1] : null;
 
-      if (medicine !== null) setdrugName(medicine);
-      if (whenToTake !== null) setwhen(whenToTake);
-      if (quantity !== null) setdrugQuantity(quantity.toString());
-      if (fromDate !== null) setFrom(fromDate);
-      if (toDate !== null) setTo(toDate);
+      if (medicine !== null) {
+        extractedData.push({
+          userId: userData?.id,
+          medicine: medicine,
+          whenToTake: whenToTake,
+          quantity: quantity,
+          fromDate: fromDate,
+          toDate: toDate,
+          isMorning: whenToTake?.toLowerCase().includes("morning")
+            ? true
+            : false,
+          isAfternoon: whenToTake?.toLowerCase().includes("afternoon")
+            ? true
+            : false,
+          isNight: whenToTake?.toLowerCase().includes("evening") ? true : false,
+        });
+      }
     });
+
+    setMedicineData(extractedData);
   };
 
   useEffect(() => {
     updateStateFromResult();
   }, [result]);
+
+  const handleMedicineChange = (text, index) => {
+    setMedicineData((prevMedicineData) => {
+      const updatedMedicineData = [...prevMedicineData];
+      updatedMedicineData[index] = {
+        ...updatedMedicineData[index],
+        medicine: text,
+      };
+      return updatedMedicineData;
+    });
+  };
+
+  const handleWhenChange = (text, index) => {
+    setMedicineData((prevMedicineData) => {
+      const updatedMedicineData = [...prevMedicineData];
+      updatedMedicineData[index] = {
+        ...updatedMedicineData[index],
+        whenToTake: text,
+      };
+      return updatedMedicineData;
+    });
+  };
+
+  const handleQuantityChange = (text, index) => {
+    setMedicineData((prevMedicineData) => {
+      const updatedMedicineData = [...prevMedicineData];
+      updatedMedicineData[index] = {
+        ...updatedMedicineData[index],
+        quantity: text,
+      };
+      return updatedMedicineData;
+    });
+  };
+
+  const handleFromDateChange = (text, index) => {
+    setMedicineData((prevMedicineData) => {
+      const updatedMedicineData = [...prevMedicineData];
+      updatedMedicineData[index] = {
+        ...updatedMedicineData[index],
+        fromDate: text,
+      };
+      return updatedMedicineData;
+    });
+  };
+
+  const handleToDateChange = (text, index) => {
+    setMedicineData((prevMedicineData) => {
+      const updatedMedicineData = [...prevMedicineData];
+      updatedMedicineData[index] = {
+        ...updatedMedicineData[index],
+        toDate: text,
+      };
+      return updatedMedicineData;
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -171,66 +270,54 @@ const Scanner = () => {
             />
           )}
           <View>
-            <Text style={styles.labelText}>Drug Name</Text>
-            <View style={styles.infoBox}>
-              <TextInput
-                style={styles.infoText}
-                value={drugName}
-                onChangeText={(t) => setdrugName(t)}
-              />
-            </View>
+            {medicineData.map((medicine, index) => (
+              <View key={index}>
+                <Text style={styles.labelText}>Drug Name {index + 1}</Text>
+                <View style={styles.infoBox}>
+                  <TextInput
+                    style={styles.infoText}
+                    value={medicine.medicine}
+                    onChangeText={(t) => handleMedicineChange(t, index)}
+                  />
+                </View>
 
-            <Text style={styles.labelText}>When to take</Text>
-            <View style={styles.infoBox}>
-              <TextInput
-                style={styles.infoText}
-                value={when}
-                onChangeText={(text) => setwhen(text)}
-              />
-            </View>
+                <Text style={styles.labelText}>When to take</Text>
+                <View style={styles.infoBox}>
+                  <TextInput
+                    style={styles.infoText}
+                    value={medicine.whenToTake}
+                    onChangeText={(text) => handleWhenChange(text, index)}
+                  />
+                </View>
 
-            <Text style={styles.labelText}>Drug Quantity</Text>
-            <View style={styles.infoBox}>
-              <TextInput
-                style={styles.infoText}
-                value={drugQuantity}
-                onChangeText={(t) => setdrugQuantity(t)}
-              />
-            </View>
+                <Text style={styles.labelText}>Drug Quantity</Text>
+                <View style={styles.infoBox}>
+                  <TextInput
+                    style={styles.infoText}
+                    value={medicine?.quantity?.toString()}
+                    onChangeText={(t) => handleQuantityChange(t, index)}
+                  />
+                </View>
 
-            <Text style={styles.labelText}>From Date</Text>
-            <View style={styles.infoBox}>
-              <TextInput
-                style={styles.infoText}
-                value={from}
-                onChangeText={(text) => setFrom(text)}
-              />
-            </View>
+                <Text style={styles.labelText}>From Date</Text>
+                <View style={styles.infoBox}>
+                  <TextInput
+                    style={styles.infoText}
+                    value={medicine.fromDate}
+                    onChangeText={(text) => handleFromDateChange(text, index)}
+                  />
+                </View>
 
-            <Text style={styles.labelText}>To Date</Text>
-            <View style={styles.infoBox}>
-              <TextInput
-                style={styles.infoText}
-                value={to}
-                onChangeText={(text) => setTo(text)}
-              />
-            </View>
-
-            <Text style={styles.labelText}>Reminder Message</Text>
-            <View
-              style={[
-                styles.infoBox,
-                { height: 100, alignItems: "flex-start", paddingTop: 10 },
-              ]}
-            >
-              <TextInput
-                style={styles.infoText}
-                multiline
-                placeholder="Enter reminder message here..."
-                value={message}
-                onChangeText={(e) => setmessage(e)}
-              />
-            </View>
+                <Text style={styles.labelText}>To Date</Text>
+                <View style={styles.infoBox}>
+                  <TextInput
+                    style={styles.infoText}
+                    value={medicine.toDate}
+                    onChangeText={(text) => handleToDateChange(text, index)}
+                  />
+                </View>
+              </View>
+            ))}
           </View>
 
           <View style={{ justifyContent: "flex-end" }}>

@@ -54,11 +54,11 @@ const Scanner = () => {
   const [result, setResult] = useState([]);
   const [camera, setCamera] = useState(null);
 
-  const medicineRegex = /Medicine:\s*([^:\n].+)/i;
-  const whenToTakeRegex = /When to take:\s*([^\n]+)/i;
-  const quantityRegex = /Quantity:\s*([^\n]+)/i;
-  const fromDateRegex = /From: (\d{2}\/\d{2}\/\d{4})/;
-  const toDateRegex = /To: (\d{2}\/\d{2}\/\d{4})/;
+  const medicineRegex = /Medicine:([^:\n]+)/i;
+  const whenToTakeRegex = /When to take:([^:\n]+)/i;
+  const quantityRegex = /Quantity:([^:\n]+)/i;
+  const fromDateRegex = /From:(\d{2}\/\d{2}\/\d{4})/;
+  const toDateRegex = /To:(\d{2}\/\d{2}\/\d{4})/;
 
   const [drugName, setdrugName] = useState("");
   const [drugQuantity, setdrugQuantity] = useState("");
@@ -78,25 +78,16 @@ const Scanner = () => {
     setloading(true);
     await axios
       .post(`${BASE_URL}/api/client/createDrugInfo`, {
-        userId: userData?.id,
-        drugName: drugName,
-        drugQuantity: drugQuantity,
-        whenToTake: when,
-        message: message,
-        start_date: currentDate,
-        end_date: currentDate,
-        isMorning: when?.toLowerCase().includes("morning") ? true : false,
-        isAfternoon: when?.toLowerCase().includes("afternoon") ? true : false,
-        isNight: when?.toLowerCase().includes("evening") ? true : false,
+        drugInfoArray: medicineData,
       })
       .then((res) => {
         setloading(false);
-        navigation.navigate("Schedule");
+        navigation.navigate("Home");
         console.log(res.data.message);
       })
       .catch((error) => {
         setloading(false);
-        console.log(error.response.data.message);
+        console.log(error.response.data.message, "error");
       });
   };
 
@@ -127,45 +118,63 @@ const Scanner = () => {
   const [medicineData, setMedicineData] = useState([]);
 
   const updateStateFromResult = () => {
-    const extractedData = [];
-
+    let drug = "";
+    let w = "";
+    let q = "";
+    let f = "";
+    let t = "";
     result.forEach((block) => {
       const text = block.lines.map((line) => line.text.trim()).join("\n");
-
       console.log(text);
 
-      const medicineMatch = text.match(medicineRegex);
-      const whenToTakeMatch = text.match(whenToTakeRegex);
-      const quantityMatch = text.match(quantityRegex);
-      const fromDateMatch = text.match(fromDateRegex);
-      const toDateMatch = text.match(toDateRegex);
+      const lines = text.split("\n");
 
-      const medicine = medicineMatch ? medicineMatch[1] : null;
-      const whenToTake = whenToTakeMatch ? whenToTakeMatch[1] : null;
-      const quantity = quantityMatch ? parseInt(quantityMatch[1]) : null;
-      const fromDate = fromDateMatch ? fromDateMatch[1] : null;
-      const toDate = toDateMatch ? toDateMatch[1] : null;
+      let medicine, whenToTake, quantity, fromDate, toDate;
+      lines.forEach((line) => {
+        if (line.includes("Medicine:")) {
+          medicine = line.replace("Medicine:", "").trim();
+          console.log(medicine, "medicine");
+          drug = medicine;
+        } else if (line?.includes("When to take:")) {
+          whenToTake = line.replace("When to take:", "").trim();
+          console.log(whenToTake, "whenToTake");
+          w = whenToTake;
+        } else if (line.includes("Quantity")) {
+          quantity = line.replace("Quantity:", "").trim();
+          console.log(quantity, "quantity");
+          q = quantity;
+        } else if (line.includes("From:")) {
+          fromDate = line.replace("From:", "").trim();
+          console.log(fromDate, "fromDate");
+          f = moment(fromDate, "DD-MM-YYYY").format("YYYY-MM-DD");
+        } else if (line.includes("To:")) {
+          toDate = line.replace("To:", "").trim();
+          console.log(toDate, "toDate");
+          t = moment(toDate, "DD-MM-YYYY").format("YYYY-MM-DD");
+        }
+      });
 
-      if (medicine !== null) {
-        extractedData.push({
+      if (drug) {
+        const isMorning = w.toLowerCase().includes("morning");
+        const isAfternoon = w.toLowerCase().includes("afternoon");
+        const isNight = w.toLowerCase().includes("evening");
+
+        const extractedData = {
           userId: userData?.id,
-          medicine: medicine,
-          whenToTake: whenToTake,
-          quantity: quantity,
-          fromDate: fromDate,
-          toDate: toDate,
-          isMorning: whenToTake?.toLowerCase().includes("morning")
-            ? true
-            : false,
-          isAfternoon: whenToTake?.toLowerCase().includes("afternoon")
-            ? true
-            : false,
-          isNight: whenToTake?.toLowerCase().includes("evening") ? true : false,
-        });
+          drugName: drug,
+          whenToTake: w,
+          drugQuantity: q,
+          start_date: f,
+          end_date: t,
+          isMorning: isMorning,
+          isAfternoon: isAfternoon,
+          isNight: isNight,
+          message: "",
+        };
+        // console.log(extractedData, "extractedData");
+        setMedicineData([extractedData]);
       }
     });
-
-    setMedicineData(extractedData);
   };
 
   useEffect(() => {
@@ -177,7 +186,7 @@ const Scanner = () => {
       const updatedMedicineData = [...prevMedicineData];
       updatedMedicineData[index] = {
         ...updatedMedicineData[index],
-        medicine: text,
+        drugName: text,
       };
       return updatedMedicineData;
     });
@@ -199,7 +208,7 @@ const Scanner = () => {
       const updatedMedicineData = [...prevMedicineData];
       updatedMedicineData[index] = {
         ...updatedMedicineData[index],
-        quantity: text,
+        drugQuantity: text,
       };
       return updatedMedicineData;
     });
@@ -210,7 +219,7 @@ const Scanner = () => {
       const updatedMedicineData = [...prevMedicineData];
       updatedMedicineData[index] = {
         ...updatedMedicineData[index],
-        fromDate: text,
+        start_date: text,
       };
       return updatedMedicineData;
     });
@@ -221,7 +230,7 @@ const Scanner = () => {
       const updatedMedicineData = [...prevMedicineData];
       updatedMedicineData[index] = {
         ...updatedMedicineData[index],
-        toDate: text,
+        end_date: text,
       };
       return updatedMedicineData;
     });
@@ -276,7 +285,7 @@ const Scanner = () => {
                 <View style={styles.infoBox}>
                   <TextInput
                     style={styles.infoText}
-                    value={medicine.medicine}
+                    value={medicine.drugName}
                     onChangeText={(t) => handleMedicineChange(t, index)}
                   />
                 </View>
@@ -294,7 +303,7 @@ const Scanner = () => {
                 <View style={styles.infoBox}>
                   <TextInput
                     style={styles.infoText}
-                    value={medicine?.quantity?.toString()}
+                    value={medicine?.drugQuantity}
                     onChangeText={(t) => handleQuantityChange(t, index)}
                   />
                 </View>
@@ -303,7 +312,7 @@ const Scanner = () => {
                 <View style={styles.infoBox}>
                   <TextInput
                     style={styles.infoText}
-                    value={medicine.fromDate}
+                    value={medicine.start_date}
                     onChangeText={(text) => handleFromDateChange(text, index)}
                   />
                 </View>
@@ -312,7 +321,7 @@ const Scanner = () => {
                 <View style={styles.infoBox}>
                   <TextInput
                     style={styles.infoText}
-                    value={medicine.toDate}
+                    value={medicine.end_date}
                     onChangeText={(text) => handleToDateChange(text, index)}
                   />
                 </View>
